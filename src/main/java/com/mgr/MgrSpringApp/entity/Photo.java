@@ -20,5 +20,6 @@ public class Photo {
     private Long id;
     @Lob
     private byte[] photoData;
+    private String name;
 
 }
