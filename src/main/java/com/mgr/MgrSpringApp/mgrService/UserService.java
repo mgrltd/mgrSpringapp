@@ -7,7 +7,7 @@ import com.mgr.MgrSpringApp.entity.Users;
 public interface UserService 
 {
 
-    UserDetails loadUserByUsername(String userName);
+    UserDetails loadUserByUsername(String mail);
     Users userDataById(long id);
     ResponseEntity<byte[]> getPhoto(Long id);
 
