@@ -9,8 +9,13 @@ import com.mgr.MgrSpringApp.entity.Districts;
 import com.mgr.MgrSpringApp.entity.States;
 import com.mgr.MgrSpringApp.entity.Users;
 import com.mgr.MgrSpringApp.response.AddressDTO;
+import com.mgr.MgrSpringApp.dto.Pagedata;
+import com.mgr.MgrSpringApp.entity.Users;
+import com.mgr.MgrSpringApp.response.ApiResponse;
+import com.mgr.MgrSpringApp.response.UserResponse;
 
 public interface AdminService {
+    List<UserResponse> getAllUsers(Pagedata pagedata);
 
     List<Users> getAllUsers();
 
@@ -28,5 +33,6 @@ public interface AdminService {
 	AreasRequest getPincode(String pincode);
 
 //	List<AddressDTO> getAllAddress();
+    ApiResponse deletUserById(Long id);
     
 }

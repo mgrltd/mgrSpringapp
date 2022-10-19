@@ -9,14 +9,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.mgr.MgrSpringApp.dto.LoginRequest;
 import com.mgr.MgrSpringApp.entity.Photo;
 import com.mgr.MgrSpringApp.entity.Users;
 import com.mgr.MgrSpringApp.mgrService.ApplicationService;
 import com.mgr.MgrSpringApp.mgrService.UserService;
 import com.mgr.MgrSpringApp.response.ApiResponse;
-
+@CrossOrigin(origins = "http://localhost:3000/")
 @RestController
 //@RequestMapping("/mgr")
 public class ApplicationController
@@ -32,6 +31,21 @@ public class ApplicationController
         System.out.println("login-------------"+loginRequest);
         return applicationService.createJwtToken(loginRequest);
     }
+     
+    @GetMapping("forgetpassword/sendOtp/{mail}")
+    public ApiResponse forgetpasswordSendOtp(@PathVariable String mail)
+    {
+        return applicationService.forgetpasswordSendOtp(mail);
+    }
+
+
+
+    
+    @GetMapping("/validashanOtp/{mail}/{otp}")
+    public ApiResponse validashanOtp(@PathVariable String mail,@PathVariable String otp)
+    {
+        return applicationService.validashanOtp(mail,otp);
+    }
 
     @GetMapping("/photoUpload")
     public Photo photoUpload(@RequestBody MultipartFile photo) throws IOException
@@ -40,16 +54,11 @@ public class ApplicationController
         
     }
 
-    
     @PostMapping("/register")
     public ApiResponse userRegister(@RequestBody Users users)
     {
      return applicationService.userRegister(users);
     }
-    @GetMapping("/loginOtp/{otp}")
-    public ApiResponse loginOtp(@PathVariable String otp)
-    {
-        return applicationService.loginOtp(otp);
-    }
+  
     
 }

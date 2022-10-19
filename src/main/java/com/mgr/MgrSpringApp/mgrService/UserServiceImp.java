@@ -36,8 +36,9 @@ public class UserServiceImp implements UserService
    }
 
 @Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		Users user = userRepository.findByUserName(username);
+	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+		Users user = userRepository.findByEmailId(email);
+		System.out.println("user details by mail id"+user);
 		if (user != null) {
 			return new org.springframework.security.core.userdetails.User(user.getUserName(), user.getPassword(), getAuthorities(user));
 		} else {
@@ -48,10 +49,10 @@ public class UserServiceImp implements UserService
 
 	private Set<SimpleGrantedAuthority> getAuthorities(Users user) {
 		Set<SimpleGrantedAuthority> authorities = new HashSet<>();
-		 user.getRole().forEach(role -> {
-		 	authorities.add(new SimpleGrantedAuthority("ROLE_"+role.getRole()));
-		 });
-        		 //	authorities.add(new SimpleGrantedAuthority("ROLE_"+"User"));
+		//  user.getRole().forEach(role -> {
+		//  	authorities.add(new SimpleGrantedAuthority("ROLE_"+role.getRole()));
+		//  });
+        		 	authorities.add(new SimpleGrantedAuthority("ROLE_"+"User"));
 		return authorities;
 	}
 

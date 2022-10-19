@@ -2,6 +2,8 @@ package com.mgr.MgrSpringApp.mgrService;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Random;
@@ -16,18 +18,17 @@ import org.springframework.security.authentication.AuthenticationManager;
 import com.mgr.MgrSpringApp.config.EmailConfig;
 import com.mgr.MgrSpringApp.config.JwtUtil;
 import com.mgr.MgrSpringApp.dto.LoginRequest;
+import com.mgr.MgrSpringApp.entity.OtpBoox;
 import com.mgr.MgrSpringApp.entity.Photo;
 import com.mgr.MgrSpringApp.entity.Roles;
 import com.mgr.MgrSpringApp.entity.Users;
+import com.mgr.MgrSpringApp.mgrRepository.OtpBooxRepository;
 import com.mgr.MgrSpringApp.mgrRepository.PhotoRepository;
 import com.mgr.MgrSpringApp.mgrRepository.RolesRepository;
 import com.mgr.MgrSpringApp.mgrRepository.UserRepository;
 import com.mgr.MgrSpringApp.response.ApiResponse;
 @Service
 public class ApplicationService {
-
-	private String loginotp="";
-	private String Name="";
 
     @Autowired
 	private JwtUtil jwtUtil;
@@ -48,7 +49,9 @@ public class ApplicationService {
 
 	@Autowired
 	private PhotoRepository photoRepository;
-
+ 
+	@Autowired
+	private OtpBooxRepository otpBooxRepository;
 
 	@Autowired
 	private EmailConfig emailConfig;
@@ -63,7 +66,7 @@ public class ApplicationService {
 		ApiResponse response=new ApiResponse();
 
         String type = loginRequest.getType();
-                Name = loginRequest.getUserName();
+              String  Name = loginRequest.getUserName();
 		String Password = loginRequest.getUserPassword();
 		 Users users=new Users();
 		 
@@ -87,20 +90,29 @@ public class ApplicationService {
 		 if(users==null)
 		 {
 			response.setResponseCode(404);
-			response.setResponseMessage("bad credentials User Notfound");
+			response.setResponseMessage("bad credentials User Notfound go to create new account");
 			return response;
 		 }
 		 if(!passwordEncoder.matches(Password,users.getPassword()))
 		 {
 		    response.setResponseCode(401);
-			response.setResponseMessage("Unauthorized password incorrect "+Name);
+			response.setResponseMessage("bad credentials password incorrect "+Name);
 			return response;
 		 }		
-		 loginotp=new DecimalFormat("000000").format(new Random().nextInt(999999));
+		String loginotp=new DecimalFormat("000000").format(new Random().nextInt(999999));
+		 OtpBoox otp=new OtpBoox();
+		 otp.setEmail(users.getEmailId());
+		 otp.setOtp(loginotp);
+		 otp.setSubject("MGR Login Verification OTP");
+		 LocalDateTime localDateTime = LocalDateTime.now();
+		 otp.setTime(localDateTime);
+		 otpBooxRepository.save(otp);
 		String s= emailConfig.sendEmailConfig(users.getEmailId(), "*MGR Login Verification OTP *", "MGR Verification OTP:"+loginotp);
 		 System.out.println("loginotp-->"+loginotp);
 		 response.setResponseCode(200);
 		 response.setResponseMessage("Ok OTP send successfully to mail "+users.getEmailId());
+		 String email=users.getEmailId();
+		 response.setResponseBody(email);
 		 return response;
 
     }
@@ -125,12 +137,16 @@ public class ApplicationService {
 //     }
     
 
-	public ApiResponse loginOtp(String otp) 
-	{
-		//System.out.println("loginotp-"+loginotp+" Name-"+Name);
-		if(loginotp.equals(otp))
+public ApiResponse validashanOtp(String mail, String otp) 
+{
+	System.out.println("--validashanOtp--"+mail+","+otp);
+		OtpBoox otpbox=otpBooxRepository.findByEmail(mail);
+		System.out.println("otp valid"+otpbox);
+		if(otpbox.getOtp().equals(otp))
 		{
-			final UserDetails userDetails = userService.loadUserByUsername(Name);
+			System.out.println("otp valid"+otpbox);
+
+			final UserDetails userDetails = userService.loadUserByUsername(mail);
 		 String newGeneratedToken = jwtUtil.generateToken(userDetails);
 		return new ApiResponse(200,newGeneratedToken);
 		}
@@ -146,11 +162,11 @@ public class ApplicationService {
      ApiResponse response=new ApiResponse();
     try {
 		System.out.println("============");
-		Long id=(long) 1;
-		Roles role=rplesRepository.findById(id).get();
-		Set<Roles> roles = new HashSet<>();
-		roles.add(role);
-		users.setRole(roles);
+		// Long id=(long) 1;
+		// Roles role=rplesRepository.findById(id).get();
+		// Set<Roles> roles = new HashSet<>();
+		// roles.add(role);
+		// users.setRole(roles);
 		users.setPassword(getEncodePassword(users.getPassword()));
      Users user=userRepository.save(users);
 
@@ -173,5 +189,23 @@ public class ApplicationService {
 		photos.setPhotoData(photo.getBytes());
 		return photoRepository.save(photos);
 	}
+
+    public ApiResponse forgetpasswordSendOtp(String mail) {
+		String subject="*MGR ForgetPassword Verification OTP *";
+
+		String otp=new DecimalFormat("000000").format(new Random().nextInt(999999));
+		OtpBoox otpBox=new OtpBoox();
+		otpBox.setEmail(mail);
+		otpBox.setOtp(otp);
+		otpBox.setSubject(subject);
+		LocalDateTime localDateTime = LocalDateTime.now();
+		otpBox.setTime(localDateTime);
+		otpBooxRepository.save(otpBox);	
+	 emailConfig.sendEmailConfig(mail, subject, "MGR FoegetPassword Verification OTP:"+otp +"dont share anay one its valid 10m ondly");
+
+        return null;
+    }
+
+		
 
 }
