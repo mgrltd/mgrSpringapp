@@ -27,62 +27,65 @@ public class AdminCountroller
     @Autowired
     private AdminService adminService;
     
-    @GetMapping("/getall")
-    public List<Users> getAllUsers()
-    {
-      return adminService.getAllUsers();
+    
+    @GetMapping("/getallcountrys")
+    public  ApiResponse getAllCountry(){
+    	 
+      List<Country> allcountrys=adminService.getAllCountry();
+      return new ApiResponse<>(200,"sucess",allcountrys);
     }
     
-    
-    @GetMapping("/getallcountry")
-    public List<Country> getAllCountry(){
-    	return adminService.getAllCountry();
+    @GetMapping("/getallstates")
+    public ApiResponse getAllStates(){
+    	List<States> allStates= adminService.getAllStates();
+      return new ApiResponse<>(200,"sucess",allStates);
+
     }
-    
-    @GetMapping("/getallstate")
-    public List<States> getAllStates(){
-    	return adminService.getAllStates();
-    }
-    
     
     @GetMapping("/getalldistricts")
-    public List<Districts> getAllDistricts(){
-    	return adminService.getAllDistricts();
+    public ApiResponse getAllDistricts(){
+    	List<Districts> allDistricts= adminService.getAllDistricts();
+      return new ApiResponse<>(200,"sucess",allDistricts);
+
     }
     
     
     @GetMapping("/getallareas")
-    public List<Areas> getAllAreas(){
-    	return adminService.getAllAreas();
+    public ApiResponse getAllAreas(){
+    	List<Areas> allAreas= adminService.getAllAreas();
+      return new ApiResponse<>(200,"sucess",allAreas);
     }
+
+    @GetMapping("/getpincode/{pincode}")
+   public AreasRequest getPincode(@PathVariable String pincode) {
+		   return adminService.getPincode(pincode);
+   }
     
+
+   //-----------------------------------------------------------------------------------------------------------
     
     @GetMapping("/getallStores")
 
-    public <T> ApiResponse<T> getAllAddress(){
+    public  ApiResponse getAllAddress(){
     	ApiResponse apiResponse=new ApiResponse();
     	try {
     			List<AddressDTO> listofStores=adminService.getAllAddress();
     			apiResponse.setResponseCode(200);
     			apiResponse.setResponseMessage("Storeslist");
     			apiResponse.setResponseBody(listofStores);
-    			
     	    	return apiResponse;
-    	}
-catch(Exception e) {
+       	  }
+        catch(Exception e) 
+        {
 	
-	apiResponse.setResponseCode(500);
-	apiResponse.setResponseMessage(" "+e);
-	apiResponse.setResponseBody(null);
-	return apiResponse;
-}
+	      apiResponse.setResponseCode(500);
+	      apiResponse.setResponseMessage(" "+e);
+	      apiResponse.setResponseBody(null);
+	        return apiResponse;
+       }
     }
     
-    
-    @GetMapping("/getpincode/{pincode}")
-   public AreasRequest getPincode(@PathVariable String pincode) {
-		   return adminService.getPincode(pincode);
-   }
+  
     
     
     
