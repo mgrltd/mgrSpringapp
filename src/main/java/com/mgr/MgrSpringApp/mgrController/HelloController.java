@@ -28,7 +28,7 @@ public class HelloController {
     @Autowired
     private ApplicationService applicationService;
 
-    @GetMapping("/wellcome")
+    @GetMapping("/welcome")
     public String hello()
     {
         return "hello wellcome to mgrSpringApp --swagger url: http://localhost:8008/swagger-ui.html#/";
