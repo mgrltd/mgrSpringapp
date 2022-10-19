@@ -53,6 +53,7 @@ public class AdminCountroller
     public ApiResponse getAllStates(){
     	List<States> allStates= adminService.getAllStates();
       return new ApiResponse<>(200,"sucess",allStates);
+    }
 
     @PostMapping("/getallusers")
     public List<UserResponse> getAllUsers(@RequestBody Pagedata pagedata)
