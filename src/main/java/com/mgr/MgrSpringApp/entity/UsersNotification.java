@@ -23,7 +23,7 @@ public class UsersNotification {
         @GeneratedValue(strategy = GenerationType.IDENTITY)  
         private Long id;
         @ManyToOne
-       private Users users;
+        private Users users;
         @ManyToOne 
         private  Notifications notification;
         

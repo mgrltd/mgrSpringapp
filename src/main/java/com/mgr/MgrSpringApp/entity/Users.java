@@ -10,6 +10,9 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,13 +22,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class Users
  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)  
     private Long id;
-    @OneToOne
-    private Photo photo;
+    private Long photoId;
     private String firstName;
     private String lastName;
     private String userName;
@@ -34,13 +38,6 @@ public class Users
     private String password;    
     @OneToOne
     private Roles role;
-    // @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    // private Set<Roles> role;
-
-    // public void role(Roles roles)
-    // {
-    //     role.add(roles);
-    // }
 
     public Users(Long id, String userName, String phoneNumber, String emailId) {
         this.id = id;

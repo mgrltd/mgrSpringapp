@@ -5,9 +5,12 @@ import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+
+import javax.persistence.Tuple;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,15 +21,29 @@ import org.springframework.security.authentication.AuthenticationManager;
 import com.mgr.MgrSpringApp.config.EmailConfig;
 import com.mgr.MgrSpringApp.config.JwtUtil;
 import com.mgr.MgrSpringApp.dto.LoginRequest;
+import com.mgr.MgrSpringApp.dto.RegisterRequest;
+import com.mgr.MgrSpringApp.dto.UpdatePasswordRequest;
+import com.mgr.MgrSpringApp.entity.Address;
+import com.mgr.MgrSpringApp.entity.Areas;
+import com.mgr.MgrSpringApp.entity.Country;
+import com.mgr.MgrSpringApp.entity.Districts;
 import com.mgr.MgrSpringApp.entity.OtpBoox;
 import com.mgr.MgrSpringApp.entity.Photo;
 import com.mgr.MgrSpringApp.entity.Roles;
+import com.mgr.MgrSpringApp.entity.States;
 import com.mgr.MgrSpringApp.entity.Users;
+import com.mgr.MgrSpringApp.mgrRepository.AddressRepository;
+import com.mgr.MgrSpringApp.mgrRepository.AreasRepository;
+import com.mgr.MgrSpringApp.mgrRepository.CountryRepository;
+import com.mgr.MgrSpringApp.mgrRepository.DistrictsRepository;
 import com.mgr.MgrSpringApp.mgrRepository.OtpBooxRepository;
 import com.mgr.MgrSpringApp.mgrRepository.PhotoRepository;
 import com.mgr.MgrSpringApp.mgrRepository.RolesRepository;
+import com.mgr.MgrSpringApp.mgrRepository.StatesRepository;
+import com.mgr.MgrSpringApp.mgrRepository.StoreRepository;
 import com.mgr.MgrSpringApp.mgrRepository.UserRepository;
 import com.mgr.MgrSpringApp.response.ApiResponse;
+import com.mgr.MgrSpringApp.response.PincodeDetailsResponse;
 @Service
 public class ApplicationService {
 
@@ -34,6 +51,8 @@ public class ApplicationService {
 	private JwtUtil jwtUtil;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private AddressRepository addressRepository;
 
 	@Autowired
     private RolesRepository rplesRepository;
@@ -55,18 +74,60 @@ public class ApplicationService {
 
 	@Autowired
 	private EmailConfig emailConfig;
+	
+	    @Autowired
+	    private CountryRepository countryrepo;
+	    
+	    @Autowired
+	    private StatesRepository staterepo;
+	    
+	    @Autowired
+	    private DistrictsRepository districtrepo;
+	    
+	    @Autowired
+	    private AreasRepository arearepo;
+	    
+	    @Autowired
+	    private StoreRepository storerepo;
  
+	
 	public String getEncodePassword(String password)
 	{
 	 return passwordEncoder.encode(password);
 	}
+	
+	public String getGenerateOtp(String mail,String subject)
+	{
+		String newotp=new DecimalFormat("000000").format(new Random().nextInt(999999));
+		 OtpBoox otp=new OtpBoox();
+		 otp.setEmail(mail);
+		 otp.setOtp(newotp);
+		 otp.setSubject(subject);
+		 LocalDateTime localDateTime = LocalDateTime.now();
+		 otp.setTime(localDateTime);
+		 otpBooxRepository.save(otp);
+		return newotp;
+	}
+	
+	public Boolean validateOtpByMail(String otp,String mail)
+	{
+		System.out.println("validate otp by mail:"+otp+" mail- "+mail);
+		OtpBoox otpbox=otpBooxRepository.findByEmail(mail);
+		if(otp.equals(otpbox.getOtp()))
+		{
+		return true;
+		}
+		else
+		{
+		 return false;
+		}
+	}
  
-    public ApiResponse createJwtToken(LoginRequest loginRequest) throws Exception
+    public ApiResponse login(LoginRequest loginRequest) throws Exception
     {
-		ApiResponse response=new ApiResponse();
 
         String type = loginRequest.getType();
-              String  Name = loginRequest.getUserName();
+        String  Name = loginRequest.getUserName();
 		String Password = loginRequest.getUserPassword();
 		 Users users=new Users();
 		 
@@ -89,34 +150,23 @@ public class ApplicationService {
 		 // login authentication 
 		 if(users==null)
 		 {
-			response.setResponseCode(404);
-			response.setResponseMessage("bad credentials User Notfound go to create new account");
-			return response;
+			return new ApiResponse(404,"bad credentials User Notfound go to create new account");
 		 }
 		 if(!passwordEncoder.matches(Password,users.getPassword()))
 		 {
-		    response.setResponseCode(401);
-			response.setResponseMessage("bad credentials password incorrect "+Name);
-			return response;
+			return new ApiResponse(401,"bad credentials password incorrect "+Name);
 		 }		
-		String loginotp=new DecimalFormat("000000").format(new Random().nextInt(999999));
-		 OtpBoox otp=new OtpBoox();
-		 otp.setEmail(users.getEmailId());
-		 otp.setOtp(loginotp);
-		 otp.setSubject("MGR Login Verification OTP");
-		 LocalDateTime localDateTime = LocalDateTime.now();
-		 otp.setTime(localDateTime);
-		 otpBooxRepository.save(otp);
-		String s= emailConfig.sendEmailConfig(users.getEmailId(), "*MGR Login Verification OTP *", "MGR Verification OTP:"+loginotp);
-		 System.out.println("loginotp-->"+loginotp);
-		 response.setResponseCode(200);
-		 response.setResponseMessage("Ok OTP send successfully to mail "+users.getEmailId());
-		 String email=users.getEmailId();
-		 response.setResponseBody(email);
-		 return response;
+		 String loginotp=getGenerateOtp(users.getEmailId(),"MGR Login Verification OTP");
+		 
+		 String s= emailConfig.sendEmailConfig(users.getEmailId(), "*MGR Login Verification OTP *", "MGR Verification OTP:"+loginotp);
+		 
+		 System.out.println("-Ok OTP send successfully to mail--"+loginotp);
+		 return new ApiResponse(200,"Ok OTP send successfully to mail ",users.getEmailId());
 
     }
 
+    
+    
 	// private void authenticate(String userName, String userPassword) throws Exception{
 	//  	try {
 	// 		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userName, userPassword));
@@ -137,18 +187,22 @@ public class ApplicationService {
 //     }
     
 
-public ApiResponse validashanOtp(String mail, String otp) 
+public ApiResponse loginValidateMailByOtp(String mail, String otp) 
 {
-	System.out.println("--validashanOtp--"+mail+","+otp);
-		OtpBoox otpbox=otpBooxRepository.findByEmail(mail);
-		System.out.println("otp valid"+otpbox);
-		if(otpbox.getOtp().equals(otp))
+	System.out.println("--generateToken ofter otp validashan--"+mail+"OTP:"+otp);
+	
+		if(validateOtpByMail(otp,mail))
 		{
-			System.out.println("otp valid"+otpbox);
-
-			final UserDetails userDetails = userService.loadUserByUsername(mail);
+			System.out.println("--otp valid sucessfully----");
+			
+	  	 Users user = userService.loadUserByUserMail(mail);
+		 
+	  	final UserDetails userDetails=userService.loadUserByUsername(user.getUserName());
+	  	     
 		 String newGeneratedToken = jwtUtil.generateToken(userDetails);
-		return new ApiResponse(200,newGeneratedToken);
+		 
+		return new ApiResponse(200,"token generate sucessfully",newGeneratedToken);
+		
 		}
 		else
 		{
@@ -156,20 +210,81 @@ public ApiResponse validashanOtp(String mail, String otp)
 		}
 	}
 
-	public ApiResponse userRegister(Users users) 
+
+//forgetpassword
+
+public ApiResponse forgetpasswordSendOtpByMail(String mail) 
+    {
+	String subject="*MGR ForgetPassword Verification OTP *";
+	String otp=new DecimalFormat("000000").format(new Random().nextInt(999999));
+	OtpBoox otpBox=new OtpBoox();
+	otpBox.setEmail(mail);
+	otpBox.setOtp(otp);
+	otpBox.setSubject(subject);
+	LocalDateTime localDateTime = LocalDateTime.now();
+	otpBox.setTime(localDateTime);
+    emailConfig.sendEmailConfig(mail, subject, "MGR FoegetPassword Verification OTP:"+otp +"dont share anay one its valid 10m ondly");
+	otpBooxRepository.save(otpBox);	
+
+    return new ApiResponse(200,"MGR FoegetPassword Verification OTP send sucessfully on ur mail:*"+mail+"*");
+    }
+
+
+public ApiResponse forgetpasswordValidateMailByOtp(String mail, String otp) {
+	
+	if(validateOtpByMail(otp,mail))
+	{
+		String ForgetPasswordVerificationSucessKey=getGenerateOtp(mail,"ForgetPasswordVerificationSucessKey");
+	return new ApiResponse(200,"verifyOTp sucessfully",ForgetPasswordVerificationSucessKey);
+	}
+	else
+	{
+		return new ApiResponse(402,"invalid otp");
+	}
+}
+
+
+
+
+public ApiResponse updatePasswordByMail(UpdatePasswordRequest updatePasswordRequest) 
+{
+	if(validateOtpByMail(updatePasswordRequest.getForgetPasswordVerificationSucessKey(),updatePasswordRequest.getMail()))
+	{
+	Users user=userRepository.findByEmailId(updatePasswordRequest.getMail());
+	user.setPassword(getEncodePassword(updatePasswordRequest.getPassword()));
+	 userRepository.save(user);
+	 return new ApiResponse(200,"*Password Update sucessfully");
+	}
+	else
+	{
+		 return new ApiResponse(404,"*bade request, befour validate ur mail");
+	}
+}
+
+	public ApiResponse userRegister(RegisterRequest registerRequest) 
       {
 
      ApiResponse response=new ApiResponse();
     try {
-		System.out.println("============");
-		// Long id=(long) 1;
-		// Roles role=rplesRepository.findById(id).get();
-		// Set<Roles> roles = new HashSet<>();
-		// roles.add(role);
-		// users.setRole(roles);
-		users.setPassword(getEncodePassword(users.getPassword()));
-     Users user=userRepository.save(users);
-
+		Users newuser=new Users();
+		
+		newuser.setPhotoId(registerRequest.getPhotoId());
+				newuser.setFirstName(registerRequest.getUserRequest().getFirstName());
+		newuser.setLastName(registerRequest.getUserRequest().getLastName());
+		newuser.setUserName(registerRequest.getUserRequest().getUserName());
+		newuser.setEmailId(registerRequest.getUserRequest().getEmailId());
+		newuser.setPhoneNumber(registerRequest.getUserRequest().getPhoneNumber());
+		newuser.setPassword(getEncodePassword(registerRequest.getUserRequest().getPassword()));
+		newuser.setRole(new Roles().builder().id((long)1).build());
+        Users user=userRepository.save(newuser);
+        
+        Address newAddress=new Address();
+        newAddress.setHousNo(registerRequest.getAddresRequest().getHousNo());
+        newAddress.setLandMark(registerRequest.getAddresRequest().getLandMark());
+        newAddress.setAreas(new Areas().builder().id(registerRequest.getAddresRequest().getAreasId()).build());
+        newAddress.setUsers(user);
+        addressRepository.save(newAddress);
+        
         response.setResponseCode(200);
         response.setResponseMessage("user save sucessfully");
 		response.setResponseBody(user);
@@ -184,28 +299,55 @@ public ApiResponse validashanOtp(String mail, String otp)
     return response;
 }
 
-	public Photo photoUpload(MultipartFile photo) throws IOException {
+	public Photo photoUpload(MultipartFile photo, String name) throws IOException {
+		if(name.equals("null"))
+			name=photo.getOriginalFilename();	
 		Photo photos=new Photo();
+		photos.setName(name);
 		photos.setPhotoData(photo.getBytes());
 		return photoRepository.save(photos);
 	}
 
-    public ApiResponse forgetpasswordSendOtp(String mail) {
-		String subject="*MGR ForgetPassword Verification OTP *";
+	public Photo UpdatephotoUpload(Long id, String name, MultipartFile photo) throws IOException 
+	{
+	
+		if(name.equals("null"))
+			name=photo.getOriginalFilename();
+		Photo getphoto=photoRepository.findById(id).get();
+		getphoto.setName(name);
+		getphoto.setPhotoData(photo.getBytes());
+		return photoRepository.save(getphoto);
+	}
 
-		String otp=new DecimalFormat("000000").format(new Random().nextInt(999999));
-		OtpBoox otpBox=new OtpBoox();
-		otpBox.setEmail(mail);
-		otpBox.setOtp(otp);
-		otpBox.setSubject(subject);
-		LocalDateTime localDateTime = LocalDateTime.now();
-		otpBox.setTime(localDateTime);
-		otpBooxRepository.save(otpBox);	
-	 emailConfig.sendEmailConfig(mail, subject, "MGR FoegetPassword Verification OTP:"+otp +"dont share anay one its valid 10m ondly");
+	
+	   public List<Country> getAllCountry() {
+	       return countryrepo.findAll();
+	   }
 
-        return null;
-    }
+	   public List<States> getAllStatesByCountryId(Country countryId){
+	       return staterepo.getAllStatesByCountryId(countryId);
+	   }
 
+	   public List<Districts> getAllDistrictsByStateId(States stateId) {
+	       return districtrepo.getAllDistrictsByStateId(stateId);
+	   }
+
+	   public List<Areas> getAllAreasByDistrictId(Districts districtId) {
+	       return arearepo.getAllAreasByDistrictId(districtId);
+	   }
+
+	  
+
+	   public PincodeDetailsResponse getAddresByPincode(String pincode)  {
+	        Tuple t = arearepo.findById(pincode);
+	        System.out.println("5346524"+""+t.get(0)+""+t.get(1)+""+t.get(2)+""+t.get(3)+""+t.get(4));
+	        
+	        
+	        return new PincodeDetailsResponse(t.get(0).toString(),t.get(1).toString(),t.get(2).toString(),t.get(3).toString(),t.get(4).toString());
+	   }
+
+	
+	
 		
 
 }

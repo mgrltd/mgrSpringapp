@@ -20,7 +20,7 @@ public class EmailConfig {
 
     public String sendEmailConfig(String toMail,String subject,String body)
     {
-        System.out.println("---sendEmailConfig--");
+        System.out.println("---sendEmailConfig-toMail-"+toMail+" -subject- "+subject+" -body-"+body);
         SimpleMailMessage message=new SimpleMailMessage();
         message.setFrom("mgr.private.ltd@gmail.com");
         message.setTo(toMail);

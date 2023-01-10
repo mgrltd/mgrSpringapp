@@ -14,6 +14,8 @@ import io.jsonwebtoken.Jwts;
 public class JwtUtil {
 	
 	private static final int TOKEN_VALIDITY = 3600 * 5;
+	private static final String signingKey = "mgr7093";
+
 	
 	public String getUserNameFromToken(String token) {
 		return getClaimFromToken(token, Claims::getSubject);
@@ -26,7 +28,7 @@ public class JwtUtil {
 	}
 	
 	private Claims getAllClaimsFromToken(String token) {
-		return Jwts.parser().setSigningKey("b2tech").parseClaimsJws(token).getBody();
+		return Jwts.parser().setSigningKey(signingKey).parseClaimsJws(token).getBody();
 	}
 	
 	public boolean validateToken(String token, UserDetails userDetails) {
@@ -48,7 +50,7 @@ public class JwtUtil {
 		return Jwts.builder().setClaims(claims).setSubject(userDetails.getUsername())
 					.setIssuedAt(new Date(System.currentTimeMillis()))
 					.setExpiration(new Date(System.currentTimeMillis() + TOKEN_VALIDITY * 1000))
-					.signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, "b2tech")
+					.signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, signingKey)
 					.compact();
 	}
 }

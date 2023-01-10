@@ -11,12 +11,10 @@ import lombok.NoArgsConstructor;
 public class UserResponse 
 {
     private Long id;
-    private Long photo;
+    private Long photoId;
     private String userName;
     private String phoneNumber;
     private String emailId;
     private String role;
-
-    
-    
+  
 }
