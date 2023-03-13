@@ -1,0 +1,104 @@
+package com.mgr.MgrSpringApp.entity;
+
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "emp")
+public class Employee {
+	
+	@Id
+	@Column(name = "empno")
+	private Long empNo;
+	public Employee(String empName, String job, Long manager, Date hireDate, Long salary, Long commission,
+			Long deptNo) {
+		super();
+		this.empName = empName;
+		this.job = job;
+		this.manager = manager;
+		this.hireDate = hireDate;
+		this.salary = salary;
+		this.commission = commission;
+		this.deptNo = deptNo;
+	}
+	public Employee(Long empNo, String empName, String job, Long manager, Date hireDate, Long salary, Long commission,
+			Long deptNo) {
+		super();
+		this.empNo = empNo;
+		this.empName = empName;
+		this.job = job;
+		this.manager = manager;
+		this.hireDate = hireDate;
+		this.salary = salary;
+		this.commission = commission;
+		this.deptNo = deptNo;
+	}
+	public Long getEmpNo() {
+		return empNo;
+	}
+	public void setEmpNo(Long empNo) {
+		this.empNo = empNo;
+	}
+	public String getEmpName() {
+		return empName;
+	}
+	public void setEmpName(String empName) {
+		this.empName = empName;
+	}
+	public String getJob() {
+		return job;
+	}
+	public void setJob(String job) {
+		this.job = job;
+	}
+	public Long getManager() {
+		return manager;
+	}
+	public void setManager(Long manager) {
+		this.manager = manager;
+	}
+	public Date getHireDate() {
+		return hireDate;
+	}
+	public void setHireDate(Date hireDate) {
+		this.hireDate = hireDate;
+	}
+	public Long getSalary() {
+		return salary;
+	}
+	public void setSalary(Long salary) {
+		this.salary = salary;
+	}
+	public Long getCommission() {
+		return commission;
+	}
+	public void setCommission(Long commission) {
+		this.commission = commission;
+	}
+	public Long getDeptNo() {
+		return deptNo;
+	}
+	public void setDeptNo(Long deptNo) {
+		this.deptNo = deptNo;
+	}
+	@Column(name = "ename")
+	private String empName;
+	@Column(name = "job")
+	private String job;
+	@Column(name = "mgr")
+	private Long manager;
+	@Column(name = "hiredate")
+	private Date hireDate;
+	@Column(name = "sal")
+	private Long salary;
+	@Column(name = "comm")
+	private Long commission;
+	@Column(name = "deptno")
+	private Long deptNo;
+
+	// Generate getters and setters...
+}
