@@ -3,6 +3,7 @@ package com.mgr.MgrSpringApp.mgrController;
 
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -36,10 +38,15 @@ import com.mgr.MgrSpringApp.response.ApiResponse;
 import com.mgr.MgrSpringApp.response.ProductsResponse;
 import com.paytm.pg.merchant.PaytmChecksum;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponses;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+
+@Api(description = "Endpoints for Creating, Retrieving, Updating and Deleting of users.", tags = { "userprofile" })
 @CrossOrigin(origins = "http://localhost:3000/")
 @RestController
 @RequestMapping("/mgr/api")
@@ -49,11 +56,14 @@ public class HelloController {
     private HelloService helloService;
     
  
-
+    @ApiOperation(value = "hello", notes = "to swagger url", response = String.class ,tags = { "HelloController" })
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid ID supplied"),
+            @ApiResponse(code = 404, message = "Customer not found")})
     @GetMapping("/wellcome")
-    public String hello()
+    public ResponseEntity<String> hello()
     {
-        return "hello wellcome to mgrSpringApp --swagger url: http://localhost:8008/swagger-ui.html#/";
+    	return	new ResponseEntity<String>( "hello wellcome to mgrSpringApp --swagger url: http://localhost:8008/swagger-ui.html#/", HttpStatus.OK);
     }
 
     @GetMapping("/photo/{id}")
@@ -83,7 +93,21 @@ public class HelloController {
    
     
     
-
+@GetMapping("/date")
+public String currentDate()
+{
+    int b[] = new int[6];
+    b[8] = 2; 
+	return  "";
+}
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     

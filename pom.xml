@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -66,6 +67,19 @@
             <version>0.9.1</version>
         </dependency>
         
+ <!---jasper  connection dependencys-->
+    <dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports</artifactId>
+			<version>6.9.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.lowagie</groupId>
+					<artifactId>itext</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+        
 <!---paytm  connection dependencys-->
 <dependency>
     <groupId>com.paytm.pg</groupId>
@@ -90,6 +104,7 @@
    <artifactId>aws-java-sdk</artifactId>
    <version>1.11.133</version>
 </dependency>
+
 		
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -126,8 +141,30 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<plugin>
+              <groupId>com.spotify</groupId>
+                 <artifactId>docker-maven-plugin</artifactId>
+                 <version>0.4.11</version>
+             <configuration>
+                   <repository>rcreddy7093/${project.artifactId}</repository>
+                   <tag></tag>
+                   <buildArgs>
+                      <JAR_FILE>target/${project.build.finalName}</JAR_FILE>
+                   </buildArgs>
+              </configuration>
+              <executions>
+                <execution>
+                  <id>default</id>
+                  <phase>install</phase>
+                  <goals>
+                    <goal>build</goal>
+                    <goal>push</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
 		</plugins>
-		<finalName>mgrspringapp</finalName>
+		<finalName>mgr-spring-app</finalName>
 	</build>
 
 </project>
